@@ -6,36 +6,36 @@
 	},
 	"item": [
 		{
-			"name": "Deploy mIoT Microservice Image",
+			"name": "STEP 1. Deploy mIoT Microservice Image",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"id": "7034352c-2af1-4033-a9ab-196a37d4025f",
 						"exec": [
-							"",
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
-							"var jsonData = JSON.parse(responseBody);",
+							"const jsonData = JSON.parse(responseBody);",
 							"",
-							"var imageName = jsonData.name;",
+							"const imageName = jsonData.name;",
 							"",
-							"pm.environment.set(\"imageName-mIoT\", imageName);",
+							"pm.environment.set(\"IMAGE_NAME\", imageName);",
 							"",
-							"pm.environment.set(\"containerName-mIoT\", imageName);",
+							"pm.environment.set(\"CONTAINER_NAME\", imageName);",
 							"",
 							"var imageIdFull = jsonData.id;",
 							"",
 							"var tempImageId =  imageName.split('-',2)[0];",
 							"",
-							"pm.environment.set(\"imageId-mIoT\", tempImageId);",
+							"pm.environment.set(\"IMAGE_ID\", tempImageId);",
 							"",
-							"if(tempImageId.substring(0) == 'm')",
-							"pm.environment.set(\"path-mIoT\", tempImageId.substring(1,(tempImageId.length)));",
-							"else ",
-							"pm.environment.set(\"path-mIoT\", \"/\" + tempImageId + \"/\" + imageName.split('-',3)[1]);",
+							"if(tempImageId.substring(0) == 'm') {",
+							"    pm.environment.set(\"IMAGE_PATH\", tempImageId.substring(1,(tempImageId.length)));",
+							"} else {",
+							"    pm.environment.set(\"IMAGE_PATH\", \"/\" + tempImageId + \"/\" + imageName.split('-',3)[1]);",
+							"}",
 							"",
 							"pm.environment.set(\"CLIENT_ID\", imageIdFull.substring(0, ((imageIdFull.length-imageName.length-1))));"
 						],
@@ -49,7 +49,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{edgeTokenAssociate}}",
+							"value": "{{EDGE_ASSOCIATE_TOKEN}}",
 							"type": "string"
 						}
 					]
@@ -69,7 +69,7 @@
 						{
 							"key": "image",
 							"type": "file",
-							"src": "/C:/Users/fmoghbel/Desktop/Smart Car/images/miot-v1.tar"
+							"src": "/D:/miot/deploy/miot-v1.tar"
 						}
 					],
 					"options": {
@@ -93,14 +93,14 @@
 			"response": []
 		},
 		{
-			"name": "Start mIoT Microservice",
+			"name": "STEP 2. Start mIoT Microservice",
 			"request": {
 				"auth": {
 					"type": "bearer",
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{edgeTokenAssociate}}",
+							"value": "{{EDGE_ASSOCIATE_TOKEN}}",
 							"type": "string"
 						}
 					]
@@ -116,7 +116,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"name\": \"{{containerName-mIoT}}\",\n\t\"image\": \"{{imageName-mIoT}}\",\n\t\"env\":\n\t{\n\t\"MCM.BASE_API_PATH\": \"{{path-mIoT}}\",\n\t\"MCM.WEBSOCKET_SUPPORT\": \"true\",\n\t\"PUB_TOPIC\": \"data\",\n\t\"PUB_URI\": \"miot/v1/notification\",\n    \"MPO\": \"https://mpo.mimik360.com/mPO/v1\",\n\t\"uMDS\": \"http://127.0.0.1:8083/mds/v1\",\n\t\"MATCH\": \"miot-v1\"\n\t}\n}",
+					"raw": "{\n\t\"name\": \"{{CONTAINER_NAME}}\",\n\t\"image\": \"{{IMAGE_NAME}}\",\n\t\"env\":\n\t{\n\t\"MCM.BASE_API_PATH\": \"{{IMAGE_PATH}}\",\n\t\"MCM.WEBSOCKET_SUPPORT\": \"true\",\n\t\"PUB_TOPIC\": \"data\",\n\t\"PUB_URI\": \"miot/v1/notification\",\n    \"MPO\": \"https://mpo.mimik360.com/mPO/v1\",\n\t\"uMDS\": \"http://127.0.0.1:8083/mds/v1\",\n\t\"MATCH\": \"miot-v1\"\n\t}\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -140,14 +140,14 @@
 			"response": []
 		},
 		{
-			"name": "Post Notification to IoT Cloud",
+			"name": "STEP 3. Post notification to IoT Cloud",
 			"request": {
 				"auth": {
 					"type": "bearer",
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{edgeTokenAssociate}}",
+							"value": "{{EDGE_ASSOCIATE_TOKEN}}",
 							"type": "string"
 						}
 					]
