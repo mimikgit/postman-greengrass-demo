@@ -1,0 +1,185 @@
+{
+	"info": {
+		"_postman_id": "1588b526-3e5f-4363-bce1-0d386af3ebf7",
+		"name": "postman-greengrass-demo-story1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Deploy mIoT Microservice Image",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7034352c-2af1-4033-a9ab-196a37d4025f",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"var imageName = jsonData.name;",
+							"",
+							"pm.environment.set(\"imageName-mIoT\", imageName);",
+							"",
+							"pm.environment.set(\"containerName-mIoT\", imageName);",
+							"",
+							"var imageIdFull = jsonData.id;",
+							"",
+							"var tempImageId =  imageName.split('-',2)[0];",
+							"",
+							"pm.environment.set(\"imageId-mIoT\", tempImageId);",
+							"",
+							"if(tempImageId.substring(0) == 'm')",
+							"pm.environment.set(\"path-mIoT\", tempImageId.substring(1,(tempImageId.length)));",
+							"else ",
+							"pm.environment.set(\"path-mIoT\", \"/\" + tempImageId + \"/\" + imageName.split('-',3)[1]);",
+							"",
+							"pm.environment.set(\"CLIENT_ID\", imageIdFull.substring(0, ((imageIdFull.length-imageName.length-1))));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{edgeTokenAssociate}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"type": "file",
+							"src": "/C:/Users/fmoghbel/Desktop/Smart Car/images/miot-v1.tar"
+						}
+					],
+					"options": {
+						"formdata": {}
+					}
+				},
+				"url": {
+					"raw": "http://{{IP_ADDRESS}}:{{PORT}}/mcm/v1/images",
+					"protocol": "http",
+					"host": [
+						"{{IP_ADDRESS}}"
+					],
+					"port": "{{PORT}}",
+					"path": [
+						"mcm",
+						"v1",
+						"images"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start mIoT Microservice",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{edgeTokenAssociate}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{containerName-mIoT}}\",\n\t\"image\": \"{{imageName-mIoT}}\",\n\t\"env\":\n\t{\n\t\"MCM.BASE_API_PATH\": \"{{path-mIoT}}\",\n\t\"MCM.WEBSOCKET_SUPPORT\": \"true\",\n\t\"PUB_TOPIC\": \"data\",\n\t\"PUB_URI\": \"miot/v1/notification\",\n    \"MPO\": \"https://mpo.mimik360.com/mPO/v1\",\n\t\"uMDS\": \"http://127.0.0.1:8083/mds/v1\",\n\t\"MATCH\": \"miot-v1\"\n\t}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{IP_ADDRESS}}:{{PORT}}/mcm/v1/containers",
+					"protocol": "http",
+					"host": [
+						"{{IP_ADDRESS}}"
+					],
+					"port": "{{PORT}}",
+					"path": [
+						"mcm",
+						"v1",
+						"containers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post Notification to IoT Cloud",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{edgeTokenAssociate}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"topic\": \"sensor/d2c/temperature\",\r\n  \"payload\": \"15\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{IP_ADDRESS}}:{{PORT}}/{{CLIENT_ID}}/miot/v1/notification",
+					"protocol": "http",
+					"host": [
+						"{{IP_ADDRESS}}"
+					],
+					"port": "{{PORT}}",
+					"path": [
+						"{{CLIENT_ID}}",
+						"miot",
+						"v1",
+						"notification"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
